@@ -64,6 +64,10 @@ function getSenderEmail() {
   return process.env.RESEND_FROM ?? "InsightQuotes <onboarding@resend.dev>";
 }
 
+function getReplyToEmail() {
+  return process.env.RESEND_REPLY_TO ?? "hello@insightquotes.com";
+}
+
 function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")
@@ -101,42 +105,44 @@ async function sendIssueEmail(args: {
   if (!apiKey) throw new Error("RESEND_API_KEY is not configured");
 
   const html = `
-    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:620px;margin:0 auto;padding:32px 24px;color:#1a1a1a">
-      <p style="font-size:13px;letter-spacing:3px;text-transform:uppercase;color:#9c681a;margin:0 0 10px">InsightQuotes Weekly #${args.issue.issue_number}</p>
-      <h1 style="font-family:Georgia,serif;font-size:34px;line-height:1.1;margin:0 0 28px">${escapeHtml(args.issue.title)}</h1>
+    <div style="font-family:Arial,sans-serif;max-width:620px;margin:0 auto;padding:24px;color:#1a1a1a">
+      <p style="font-size:15px;line-height:1.6;margin:0 0 18px">InsightQuotes Weekly #${args.issue.issue_number}</p>
+      <h1 style="font-size:26px;line-height:1.25;margin:0 0 24px">${escapeHtml(args.issue.title)}</h1>
 
-      <div style="border-top:1px solid #e5dacb;padding-top:24px;margin-top:24px">
-        <h2 style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#9c681a;margin:0 0 10px">The Insight</h2>
-        <p style="font-family:Georgia,serif;font-size:22px;line-height:1.4;margin:0">${escapeHtml(args.issue.insight)}</p>
+      <div style="margin:0 0 24px">
+        <p style="font-size:13px;color:#777;margin:0 0 8px">The Insight</p>
+        <p style="font-size:19px;line-height:1.5;margin:0">${escapeHtml(args.issue.insight)}</p>
         ${
           args.issue.insight_author
-            ? `<p style="font-size:13px;color:#666;margin:10px 0 0">${escapeHtml(args.issue.insight_author)}</p>`
+            ? `<p style="font-size:14px;color:#666;margin:8px 0 0">${escapeHtml(args.issue.insight_author)}</p>`
             : ""
         }
       </div>
 
-      <div style="border-top:1px solid #e5dacb;padding-top:24px;margin-top:24px">
-        <h2 style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#9c681a;margin:0 0 10px">The Quote</h2>
-        <p style="font-family:Georgia,serif;font-size:22px;line-height:1.4;margin:0">&ldquo;${escapeHtml(args.issue.quote)}&rdquo;</p>
+      <div style="margin:0 0 24px">
+        <p style="font-size:13px;color:#777;margin:0 0 8px">The Quote</p>
+        <p style="font-size:19px;line-height:1.5;margin:0">&ldquo;${escapeHtml(args.issue.quote)}&rdquo;</p>
         ${
           args.issue.quote_author
-            ? `<p style="font-size:13px;color:#666;margin:10px 0 0">${escapeHtml(args.issue.quote_author)}</p>`
+            ? `<p style="font-size:14px;color:#666;margin:8px 0 0">${escapeHtml(args.issue.quote_author)}</p>`
             : ""
         }
       </div>
 
-      <div style="border-top:1px solid #e5dacb;padding-top:24px;margin-top:24px">
-        <h2 style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#9c681a;margin:0 0 10px">The Action</h2>
-        <p style="font-family:Georgia,serif;font-size:22px;line-height:1.4;margin:0">${escapeHtml(args.issue.action_text)}</p>
+      <div style="margin:0 0 24px">
+        <p style="font-size:13px;color:#777;margin:0 0 8px">The Action</p>
+        <p style="font-size:19px;line-height:1.5;margin:0">${escapeHtml(args.issue.action_text)}</p>
       </div>
 
       ${
         args.issue.body
-          ? `<div style="border-top:1px solid #e5dacb;padding-top:24px;margin-top:24px">${renderParagraphs(args.issue.body)}</div>`
+          ? `<div style="margin:0 0 24px">${renderParagraphs(args.issue.body)}</div>`
           : ""
       }
 
-      <hr style="border:none;border-top:1px solid #e5dacb;margin:30px 0 18px">
+      <p style="font-size:16px;line-height:1.7;margin:0 0 24px">
+        If this was useful, reply and tell me what stood out. Short replies help keep these emails in your main inbox.
+      </p>
       <p style="font-size:12px;color:#777;line-height:1.6;margin:0">
         You are receiving this because you subscribed to InsightQuotes Weekly.
         <a href="${args.unsubscribeUrl}" style="color:#777">Unsubscribe</a>.
@@ -153,6 +159,7 @@ async function sendIssueEmail(args: {
     body: JSON.stringify({
       from: getSenderEmail(),
       to: [args.to],
+      reply_to: getReplyToEmail(),
       subject: `InsightQuotes Weekly #${args.issue.issue_number}: ${args.issue.title}`,
       html,
     }),

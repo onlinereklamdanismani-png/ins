@@ -17,6 +17,10 @@ function getSenderEmail() {
   return process.env.RESEND_FROM ?? "InsightQuotes <onboarding@resend.dev>";
 }
 
+function getReplyToEmail() {
+  return process.env.RESEND_REPLY_TO ?? "hello@insightquotes.com";
+}
+
 function getBaseUrl() {
   if (process.env.SITE_URL) {
     return process.env.SITE_URL.replace(/\/$/, "");
@@ -39,23 +43,20 @@ async function sendConfirmationEmail(args: {
   if (!apiKey) throw new Error("RESEND_API_KEY is not configured");
 
   const html = `
-    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;color:#1a1a1a">
-      <h1 style="font-size:24px;margin:0 0 16px">Confirm your subscription</h1>
-      <p style="font-size:16px;line-height:1.6;margin:0 0 24px">
-        Welcome to <strong>InsightQuotes Weekly</strong>. Please confirm your email address to start receiving issues.
+    <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1a1a1a">
+      <p style="font-size:16px;line-height:1.6;margin:0 0 16px">Hi,</p>
+      <p style="font-size:16px;line-height:1.6;margin:0 0 16px">
+        Thanks for joining InsightQuotes Weekly. Please confirm your email address so I know it is really you.
       </p>
-      <p style="margin:0 0 32px">
-        <a href="${args.confirmUrl}" style="display:inline-block;background:#1a2740;color:#fff;text-decoration:none;font-weight:bold;padding:14px 28px;border-radius:8px">
-          Confirm subscription
-        </a>
+      <p style="font-size:16px;line-height:1.6;margin:0 0 16px">
+        Confirm here: <a href="${args.confirmUrl}" style="color:#1a2740">${args.confirmUrl}</a>
       </p>
-      <p style="font-size:13px;color:#666;line-height:1.6;margin:0 0 8px">
-        Or paste this link into your browser:<br>
-        <span style="color:#1a2740;word-break:break-all">${args.confirmUrl}</span>
+      <p style="font-size:16px;line-height:1.6;margin:0 0 16px">
+        If you want future issues to land in your main inbox, reply to this email with a quick hello.
       </p>
-      <hr style="border:none;border-top:1px solid #e5e5e5;margin:24px 0">
-      <p style="font-size:12px;color:#888;margin:0">
-        You received this because someone (hopefully you) entered this email on our site. If not, just ignore — you won't be subscribed. You can also <a href="${args.unsubscribeUrl}" style="color:#888">unsubscribe</a>.
+      <p style="font-size:16px;line-height:1.6;margin:0 0 24px">See you soon,<br>InsightQuotes</p>
+      <p style="font-size:12px;color:#777;line-height:1.5;margin:0">
+        If this was not you, ignore this email. You can also <a href="${args.unsubscribeUrl}" style="color:#777">unsubscribe</a>.
       </p>
     </div>
   `;
@@ -69,6 +70,7 @@ async function sendConfirmationEmail(args: {
     body: JSON.stringify({
       from: getSenderEmail(),
       to: [args.to],
+      reply_to: getReplyToEmail(),
       subject: "Confirm your subscription to InsightQuotes Weekly",
       html,
     }),
