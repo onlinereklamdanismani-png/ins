@@ -68,25 +68,6 @@ function getReplyToEmail() {
   return process.env.RESEND_REPLY_TO ?? "hello@insightquotes.com";
 }
 
-function escapeHtml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
-}
-
-function renderParagraphs(value: string | null) {
-  if (!value) return "";
-  return escapeHtml(value)
-    .split(/\n{2,}/)
-    .map(
-      (paragraph) => `<p style="font-size:16px;line-height:1.7;margin:0 0 18px">${paragraph}</p>`,
-    )
-    .join("");
-}
-
 function renderPlainParagraphs(value: string | null) {
   if (!value) return "";
   return value
@@ -133,50 +114,6 @@ async function sendIssueEmail(args: {
     .filter(Boolean)
     .join("\n\n");
 
-  const html = `
-    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:22px;color:#1a1a1a">
-      <p style="font-size:16px;line-height:1.7;margin:0 0 18px">Hi,</p>
-      <p style="font-size:16px;line-height:1.7;margin:0 0 18px">One idea I kept coming back to this week:</p>
-
-      <div style="margin:0 0 22px">
-        <p style="font-size:18px;line-height:1.55;margin:0">${escapeHtml(args.issue.insight)}</p>
-        ${
-          args.issue.insight_author
-            ? `<p style="font-size:14px;color:#666;margin:8px 0 0">${escapeHtml(args.issue.insight_author)}</p>`
-            : ""
-        }
-      </div>
-
-      <p style="font-size:16px;line-height:1.7;margin:0 0 12px">A quote worth keeping:</p>
-      <div style="margin:0 0 22px">
-        <p style="font-size:18px;line-height:1.55;margin:0">&ldquo;${escapeHtml(args.issue.quote)}&rdquo;</p>
-        ${
-          args.issue.quote_author
-            ? `<p style="font-size:14px;color:#666;margin:8px 0 0">${escapeHtml(args.issue.quote_author)}</p>`
-            : ""
-        }
-      </div>
-
-      <p style="font-size:16px;line-height:1.7;margin:0 0 12px">A small thing to try:</p>
-      <div style="margin:0 0 22px">
-        <p style="font-size:18px;line-height:1.55;margin:0">${escapeHtml(args.issue.action_text)}</p>
-      </div>
-
-      ${
-        args.issue.body
-          ? `<div style="margin:0 0 22px">${renderParagraphs(args.issue.body)}</div>`
-          : ""
-      }
-
-      <p style="font-size:16px;line-height:1.7;margin:0 0 18px">If this was useful, reply and tell me what stood out.</p>
-      <p style="font-size:16px;line-height:1.7;margin:0 0 24px">Mira<br>InsightQuotes</p>
-      <p style="font-size:12px;color:#777;line-height:1.6;margin:0">
-        <a href="${args.unsubscribeUrl}" style="color:#777">Unsubscribe</a>
-        <br>Unit 117011, PO Box 15113, Birmingham, B2 2NJ
-      </p>
-    </div>
-  `;
-
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -189,7 +126,6 @@ async function sendIssueEmail(args: {
       reply_to: getReplyToEmail(),
       subject: args.issue.title,
       text,
-      html,
     }),
   });
 
