@@ -87,6 +87,15 @@ function renderParagraphs(value: string | null) {
     .join("");
 }
 
+function renderPlainParagraphs(value: string | null) {
+  if (!value) return "";
+  return value
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .join("\n\n");
+}
+
 async function sendIssueEmail(args: {
   to: string;
   issue: {
@@ -104,14 +113,33 @@ async function sendIssueEmail(args: {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) throw new Error("RESEND_API_KEY is not configured");
 
-  const html = `
-    <div style="font-family:Arial,sans-serif;max-width:620px;margin:0 auto;padding:24px;color:#1a1a1a">
-      <p style="font-size:15px;line-height:1.6;margin:0 0 18px">InsightQuotes Weekly #${args.issue.issue_number}</p>
-      <h1 style="font-size:26px;line-height:1.25;margin:0 0 24px">${escapeHtml(args.issue.title)}</h1>
+  const text = [
+    `Hi,`,
+    `One idea I kept coming back to this week:`,
+    args.issue.insight,
+    args.issue.insight_author ? `- ${args.issue.insight_author}` : "",
+    `A quote worth keeping:`,
+    `"${args.issue.quote}"`,
+    args.issue.quote_author ? `- ${args.issue.quote_author}` : "",
+    `A small thing to try:`,
+    args.issue.action_text,
+    renderPlainParagraphs(args.issue.body),
+    `If this was useful, reply and tell me what stood out.`,
+    `Mira`,
+    `InsightQuotes`,
+    `Unsubscribe: ${args.unsubscribeUrl}`,
+    `Unit 117011, PO Box 15113, Birmingham, B2 2NJ`,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 
-      <div style="margin:0 0 24px">
-        <p style="font-size:13px;color:#777;margin:0 0 8px">The Insight</p>
-        <p style="font-size:19px;line-height:1.5;margin:0">${escapeHtml(args.issue.insight)}</p>
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:22px;color:#1a1a1a">
+      <p style="font-size:16px;line-height:1.7;margin:0 0 18px">Hi,</p>
+      <p style="font-size:16px;line-height:1.7;margin:0 0 18px">One idea I kept coming back to this week:</p>
+
+      <div style="margin:0 0 22px">
+        <p style="font-size:18px;line-height:1.55;margin:0">${escapeHtml(args.issue.insight)}</p>
         ${
           args.issue.insight_author
             ? `<p style="font-size:14px;color:#666;margin:8px 0 0">${escapeHtml(args.issue.insight_author)}</p>`
@@ -119,9 +147,9 @@ async function sendIssueEmail(args: {
         }
       </div>
 
-      <div style="margin:0 0 24px">
-        <p style="font-size:13px;color:#777;margin:0 0 8px">The Quote</p>
-        <p style="font-size:19px;line-height:1.5;margin:0">&ldquo;${escapeHtml(args.issue.quote)}&rdquo;</p>
+      <p style="font-size:16px;line-height:1.7;margin:0 0 12px">A quote worth keeping:</p>
+      <div style="margin:0 0 22px">
+        <p style="font-size:18px;line-height:1.55;margin:0">&ldquo;${escapeHtml(args.issue.quote)}&rdquo;</p>
         ${
           args.issue.quote_author
             ? `<p style="font-size:14px;color:#666;margin:8px 0 0">${escapeHtml(args.issue.quote_author)}</p>`
@@ -129,23 +157,21 @@ async function sendIssueEmail(args: {
         }
       </div>
 
-      <div style="margin:0 0 24px">
-        <p style="font-size:13px;color:#777;margin:0 0 8px">The Action</p>
-        <p style="font-size:19px;line-height:1.5;margin:0">${escapeHtml(args.issue.action_text)}</p>
+      <p style="font-size:16px;line-height:1.7;margin:0 0 12px">A small thing to try:</p>
+      <div style="margin:0 0 22px">
+        <p style="font-size:18px;line-height:1.55;margin:0">${escapeHtml(args.issue.action_text)}</p>
       </div>
 
       ${
         args.issue.body
-          ? `<div style="margin:0 0 24px">${renderParagraphs(args.issue.body)}</div>`
+          ? `<div style="margin:0 0 22px">${renderParagraphs(args.issue.body)}</div>`
           : ""
       }
 
-      <p style="font-size:16px;line-height:1.7;margin:0 0 24px">
-        If this was useful, reply and tell me what stood out. Short replies help keep these emails in your main inbox.
-      </p>
+      <p style="font-size:16px;line-height:1.7;margin:0 0 18px">If this was useful, reply and tell me what stood out.</p>
+      <p style="font-size:16px;line-height:1.7;margin:0 0 24px">Mira<br>InsightQuotes</p>
       <p style="font-size:12px;color:#777;line-height:1.6;margin:0">
-        You are receiving this because you subscribed to InsightQuotes Weekly.
-        <a href="${args.unsubscribeUrl}" style="color:#777">Unsubscribe</a>.
+        <a href="${args.unsubscribeUrl}" style="color:#777">Unsubscribe</a>
         <br>Unit 117011, PO Box 15113, Birmingham, B2 2NJ
       </p>
     </div>
@@ -161,7 +187,8 @@ async function sendIssueEmail(args: {
       from: getSenderEmail(),
       to: [args.to],
       reply_to: getReplyToEmail(),
-      subject: `InsightQuotes Weekly #${args.issue.issue_number}: ${args.issue.title}`,
+      subject: args.issue.title,
+      text,
       html,
     }),
   });
