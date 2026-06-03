@@ -14,7 +14,7 @@ function createToken() {
 }
 
 function getSenderEmail() {
-  return process.env.RESEND_FROM ?? "InsightQuotes <onboarding@resend.dev>";
+  return process.env.RESEND_FROM ?? "Mira from InsightQuotes <hello@insightquotes.com>";
 }
 
 function getReplyToEmail() {
@@ -54,7 +54,7 @@ async function sendConfirmationEmail(args: {
       <p style="font-size:16px;line-height:1.6;margin:0 0 16px">
         If you want future issues to land in your main inbox, reply to this email with a quick hello.
       </p>
-      <p style="font-size:16px;line-height:1.6;margin:0 0 24px">See you soon,<br>InsightQuotes</p>
+      <p style="font-size:16px;line-height:1.6;margin:0 0 24px">See you soon,<br>Mira<br>InsightQuotes</p>
       <p style="font-size:12px;color:#777;line-height:1.5;margin:0">
         If this was not you, ignore this email. You can also <a href="${args.unsubscribeUrl}" style="color:#777">unsubscribe</a>.
       </p>

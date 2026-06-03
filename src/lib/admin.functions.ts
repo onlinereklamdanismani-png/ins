@@ -61,7 +61,7 @@ function getBaseUrl() {
 }
 
 function getSenderEmail() {
-  return process.env.RESEND_FROM ?? "InsightQuotes <onboarding@resend.dev>";
+  return process.env.RESEND_FROM ?? "Mira from InsightQuotes <hello@insightquotes.com>";
 }
 
 function getReplyToEmail() {
