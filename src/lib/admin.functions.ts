@@ -146,6 +146,7 @@ async function sendIssueEmail(args: {
       <p style="font-size:12px;color:#777;line-height:1.6;margin:0">
         You are receiving this because you subscribed to InsightQuotes Weekly.
         <a href="${args.unsubscribeUrl}" style="color:#777">Unsubscribe</a>.
+        <br>Unit 117011, PO Box 15113, Birmingham, B2 2NJ
       </p>
     </div>
   `;

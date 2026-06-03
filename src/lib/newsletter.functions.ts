@@ -57,6 +57,7 @@ async function sendConfirmationEmail(args: {
       <p style="font-size:16px;line-height:1.6;margin:0 0 24px">See you soon,<br>Mira<br>InsightQuotes</p>
       <p style="font-size:12px;color:#777;line-height:1.5;margin:0">
         If this was not you, ignore this email. You can also <a href="${args.unsubscribeUrl}" style="color:#777">unsubscribe</a>.
+        <br>Unit 117011, PO Box 15113, Birmingham, B2 2NJ
       </p>
     </div>
   `;
