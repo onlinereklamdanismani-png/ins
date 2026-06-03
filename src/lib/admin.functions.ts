@@ -48,6 +48,10 @@ function getBearerToken() {
 }
 
 function getBaseUrl() {
+  if (process.env.SITE_URL) {
+    return process.env.SITE_URL.replace(/\/$/, "");
+  }
+
   const host = getRequestHeader("x-forwarded-host") ?? getRequestHeader("host");
   const forwardedProto = getRequestHeader("x-forwarded-proto");
   const proto =
